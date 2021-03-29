@@ -1,0 +1,123 @@
+{
+    recipes: [
+        {
+            id: number,
+            name: string,
+            feature_img: url,
+            description: string,
+            gallary: [
+                url,
+                url,
+                url
+            ],
+            ingredients: [ number, number, number ],
+            directions: [
+                string,
+                string,
+                string
+            ],
+            time: string,
+            benefits: [
+                string,
+                string,
+                string
+            ],
+            special_notes: [
+                string,
+                string
+            ],
+            categories: [ number, number, number ],
+            tags: [ number, number, number ],
+            author: [ number, number, number ]
+        }
+    ],
+    ingredients: [
+        {
+            id: number,
+            name: string,
+            img: url,
+            unit: string,
+            qty: number,
+            price: number,
+            price_unit: string
+        },
+        {
+            id: number,
+            name: string,
+            img: url,
+            unit: string,
+            qty: number,
+            price: number,
+            price_unit: string
+        },
+        {
+            id: number,
+            name: string,
+            img: url,
+            unit: string,
+            qty: number,
+            price: number,
+            price_unit: string
+        }
+    ],
+    categories: [
+        {
+            id: number,
+            name: string,
+            img: url,
+            receipes: [number, number, number]
+        },
+        {
+            id: number,
+            name: string,
+            img: url,
+            receipes: [number, number, number]
+        },
+        {
+            id: number,
+            name: string,
+            img: url,
+            receipes: [number, number, number]
+        },
+    ],
+    tags: [
+        {
+            id: number,
+            name: string,
+            img: url,
+            receipes: [number, number, number]
+        },
+        {
+            id: number,
+            name: string,
+            img: url,
+            receipes: [number, number, number]
+        },
+        {
+            id: number,
+            name: string,
+            img: url,
+            receipes: [number, number, number]
+        },
+    ],
+    author: [
+        {
+            id: number,
+            name: string,
+            img: url,
+            receipes: [number, number, number]
+        },
+        {
+            id: number,
+            name: string,
+            img: url,
+            receipes: [number, number, number]
+        }
+        {
+            id: number,
+            name: string,
+            img: url,
+            receipes: [number, number, number]
+        }
+    ]
+}

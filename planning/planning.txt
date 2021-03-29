@@ -1,0 +1,28 @@
+Functionality Requirement:
+    1) Recipe Listing,
+    2) search recipe with names
+    3) filter by category
+    4) Filter by tags
+    4) Selected tags and filter should be displayed on the screen and user should have ability to clear
+    5) Let user add the new recipes
+    6) To add new recipes user should register/login.
+    7) User can purchase the recipe after login/register. On purchase or add to cart all the ingredients of that receipe should be added into the cart with quantity defined in the recipe.
+    8) In cart user can remove, add items. Can increase, decrease the ingredients quantity.
+    9) After placing order he should receive the email with order details.
+
+Tech Stack:
+    Frontend:
+        1) Vue
+        2) Vue Router
+        3) Vuex
+        4) Tailwind CSS
+        5) Axios
+        6) UUID
+    Backend:
+        1) Firebase
+    Authentication:
+        1) Firebase google authentication
+    Testing:
+        1) Cypress
+    Host:
+        Netlify
