@@ -26,6 +26,7 @@
                 string,
                 string
             ],
+            food_type: string,
             categories: [ number, number, number ],
             tags: [ number, number, number ],
             author: [ number, number, number ]
@@ -65,19 +66,19 @@
             id: number,
             name: string,
             img: url,
-            receipes: [number, number, number]
+            recipes: [number, number, number]
         },
         {
             id: number,
             name: string,
             img: url,
-            receipes: [number, number, number]
+            recipes: [number, number, number]
         },
         {
             id: number,
             name: string,
             img: url,
-            receipes: [number, number, number]
+            recipes: [number, number, number]
         },
     ],
     tags: [
@@ -85,19 +86,19 @@
             id: number,
             name: string,
             img: url,
-            receipes: [number, number, number]
+            recipes: [number, number, number]
         },
         {
             id: number,
             name: string,
             img: url,
-            receipes: [number, number, number]
+            recipes: [number, number, number]
         },
         {
             id: number,
             name: string,
             img: url,
-            receipes: [number, number, number]
+            recipes: [number, number, number]
         },
     ],
     author: [
@@ -105,19 +106,19 @@
             id: number,
             name: string,
             img: url,
-            receipes: [number, number, number]
+            recipes: [number, number, number]
         },
         {
             id: number,
             name: string,
             img: url,
-            receipes: [number, number, number]
+            recipes: [number, number, number]
         }
         {
             id: number,
             name: string,
             img: url,
-            receipes: [number, number, number]
+            recipes: [number, number, number]
         }
     ]
 }
