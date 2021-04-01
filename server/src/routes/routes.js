@@ -1,6 +1,6 @@
 import { 
     getRecipe,
-    addRecipe
+    createRecipeHandler
 } from '../controllers/controller'
 
 const routes = (app) => {
@@ -12,7 +12,7 @@ const routes = (app) => {
             next();
         }, getRecipe)
 
-        .post(addRecipe);
+        .post(createRecipeHandler);
 }
 
 export default routes;
