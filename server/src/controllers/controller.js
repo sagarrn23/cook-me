@@ -4,6 +4,9 @@ import {
     TaxonomySchema,
 } from '../models/model';
 
+mongoose.set('useFindAndModify', false);
+
+
 const Recipe = mongoose.model('Recipe', RecipeSchema, 'recipes');
 const Category = mongoose.model('Category', TaxonomySchema, 'categories');
 const Tag = mongoose.model('Tag', TaxonomySchema, 'tags');
@@ -19,22 +22,24 @@ export const createRecipeHandler = (req, res) => {
     const tags = inputData.tags;
     const addedTags = addTaxonomy(tags, Tag);
 
-    const authors = inputData.author;
-    const addedAuthors = addTaxonomy(authors, Author);
+    const author = inputData.author;
+    const addedAuthor = addTaxonomy(author, Author);
 
-    Promise.all([addedRecipe, addedCategories, addedTags, addedAuthors])
+    Promise.all([addedRecipe, addedCategories, addedTags, addedAuthor])
             .then(response => {
                 // console.log(response);
                 const recipeIds = response[0]._id;
                 const catIds = response[1].map(cat => cat._id);
                 const tagIds = response[2].map(tag => tag._id);
-                const authorIds = response[3].map(author => author._id);
+                const authorId = response[3]._id;
+                console.log(response);
+
                 Recipe.findByIdAndUpdate(
                     {_id: recipeIds}, 
                     {
                         category_ids: catIds,
                         tag_ids: tagIds,
-                        author_ids: authorIds
+                        author_ids: authorId
                     }, 
                     {new: true}, 
                     (err, result) => {
@@ -63,13 +68,11 @@ export const createRecipeHandler = (req, res) => {
                     })
                 })
 
-                authorIds.forEach(id => {
-                    Author.findByIdAndUpdate({_id: id}, {recipe_ids: recipeIds}, {new: true}, (err, result) => {
-                        if(err) {
-                            console.log(err)
-                        }
-                        console.log(result)
-                    })
+                Author.findByIdAndUpdate({_id: authorId}, {recipe_ids: recipeIds}, {new: true}, (err, result) => {
+                    if(err) {
+                        console.log(err)
+                    }
+                    console.log(result)
                 })
             })
             .then(()=>{
@@ -84,13 +87,21 @@ const addRecipe = async (data) => {
 
 const addTaxonomy = async(data, schema) => {
 
-    const formatedData = data.map(item => {
-        return {
-            name: item
+    const formatedData = () => {
+        if(typeof data === 'string') {
+            return {
+                name: data
+            }
         }
-    });
 
-    const addedData = await schema.create(formatedData);
+        return data.map(item => {
+            return {
+                name: item
+            }
+        })
+    };
+
+    const addedData = await schema.create(formatedData());
     return addedData;
 
 }

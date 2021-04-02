@@ -15,10 +15,11 @@ export const RecipeSchema = new Schema({
         type: Schema.Types.Mixed,
         required: true
     }],
-    author_ids: [{
+    author_ids: {
         type: Schema.Types.Mixed,
-        required: true
-    }],
+        required: true,
+        default: 0
+    },
 });
 
 export const TaxonomySchema = new Schema({
