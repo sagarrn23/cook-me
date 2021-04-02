@@ -16,3 +16,5 @@ const routes = (app) => {
 }
 
 export default routes;
+
+// https://www.geeksforgeeks.org/upload-and-retrieve-image-on-mongodb-using-mongoose/

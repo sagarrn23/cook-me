@@ -11,9 +11,17 @@ export const RecipeSchema = new Schema({
         type: Schema.Types.Mixed,
         required: true
     }],
+    tag_ids: [{
+        type: Schema.Types.Mixed,
+        required: true
+    }],
+    author_ids: [{
+        type: Schema.Types.Mixed,
+        required: true
+    }],
 });
 
-export const CategorySchema = new Schema({
+export const TaxonomySchema = new Schema({
     name: {
         type: String,
         required: true
