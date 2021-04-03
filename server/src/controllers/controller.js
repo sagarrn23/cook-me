@@ -24,21 +24,41 @@ export const createRecipeHandler = (req, res) => {
 
     const author = inputData.author;
     const addedAuthor = addTaxonomy(author, Author);
+    const addedCollections = [addedRecipe, addedCategories, addedTags, addedAuthor];
+    updateRelations(addedCollections, res);
+}
 
-    Promise.all([addedRecipe, addedCategories, addedTags, addedAuthor])
+const updateRelations = (addedCollections, res) => {
+    Promise.all([...addedCollections])
             .then(response => {
-                // console.log(response);
                 const recipeIds = response[0]._id;
-                const catIds = response[1].map(cat => cat._id);
-                const tagIds = response[2].map(tag => tag._id);
+                const catIds = response[1];
+                const tagIds = response[2];
                 const authorId = response[3]._id;
-                console.log(response);
+
+                const updateRecipeTax = (ids, id_title) => {
+                    Promise.all([...ids]).then(res => {
+                        const taxIds = res.map(taxId=> taxId._id);
+                        Recipe.findByIdAndUpdate(
+                            {_id: recipeIds}, 
+                            {   
+                                [id_title]: taxIds
+                            }, 
+                            {new: true}, 
+                            (err, result) => {
+                                if(err) {
+                                    console.log(err)
+                                }
+                            }
+                        );
+                    })
+                }
+                updateRecipeTax(catIds, 'category_ids')
+                updateRecipeTax(tagIds, 'tag_ids')
 
                 Recipe.findByIdAndUpdate(
                     {_id: recipeIds}, 
                     {
-                        category_ids: catIds,
-                        tag_ids: tagIds,
                         author_ids: authorId
                     }, 
                     {new: true}, 
@@ -46,25 +66,26 @@ export const createRecipeHandler = (req, res) => {
                         if(err) {
                             console.log(err)
                         }
-                        console.log(result)
                     }
                 );
 
-                catIds.forEach(id => {
-                    Category.findByIdAndUpdate({_id: id}, {recipe_ids: recipeIds}, {new: true}, (err, result) => {
-                        if(err) {
-                            console.log(err)
-                        }
-                        console.log(result)
+                catIds.forEach(catId => {
+                    catId.then(cat => {
+                        Category.findByIdAndUpdate({_id: cat._id}, {recipe_ids: recipeIds}, {new: true}, (err, result) => {
+                            if(err) {
+                                console.log(err)
+                            }
+                        })
                     })
                 })
 
-                tagIds.forEach(id => {
-                    Tag.findByIdAndUpdate({_id: id}, {recipe_ids: recipeIds}, {new: true}, (err, result) => {
-                        if(err) {
-                            console.log(err)
-                        }
-                        console.log(result)
+                tagIds.forEach(tagId => {
+                    tagId.then(tag => {
+                        Category.findByIdAndUpdate({_id: tag._id}, {recipe_ids: recipeIds}, {new: true}, (err, result) => {
+                            if(err) {
+                                console.log(err)
+                            }
+                        })
                     })
                 })
 
@@ -72,7 +93,6 @@ export const createRecipeHandler = (req, res) => {
                     if(err) {
                         console.log(err)
                     }
-                    console.log(result)
                 })
             })
             .then(()=>{
@@ -81,29 +101,53 @@ export const createRecipeHandler = (req, res) => {
 }
 
 const addRecipe = async (data) => {
-    const addedData = await Recipe.create(data);
-    return addedData;
+    if('id' in data) {
+        const updatedData = await Recipe.findByIdAndUpdate({_id: data.id}, data, {new: true}, (err, result) => {
+            return result;
+        });
+        return updatedData;
+    } else {
+        const addedData = await Recipe.create(data);
+        return addedData;
+    }
 }
 
 const addTaxonomy = async(data, schema) => {
-
     const formatedData = () => {
-        if(typeof data === 'string') {
-            return {
-                name: data
-            }
+        if(!Array.isArray(data)) {
+            return data
         }
-
         return data.map(item => {
-            return {
-                name: item
-            }
+            return item
         })
     };
 
-    const addedData = await schema.create(formatedData());
-    return addedData;
+    if(Array.isArray(formatedData())){
+        const addedData = formatedData().map(async(item) => {
+            if('id' in item) {
+                const updatedData = await schema.findByIdAndUpdate({_id: item.id}, item, {new: true}, (err, result) => {
+                    return result;
+                });
+                return updatedData;
+            } else {
+                const newData = await schema.create(item);
+                return newData;
+            }
+        })
+        return addedData;
+    } else {
+        const authorData = formatedData()
 
+        if('id' in authorData) {
+            const updatedData = await schema.findByIdAndUpdate({_id: authorData.id}, authorData, {new: true}, (err, result) => {
+                return result;
+            });
+            return updatedData;
+        } else {
+            const newData = await schema.create(authorData);
+            return newData;
+        }
+    }
 }
 
 export const getRecipe = (req, res) => {

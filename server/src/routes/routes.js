@@ -12,7 +12,9 @@ const routes = (app) => {
             next();
         }, getRecipe)
 
-        .post(createRecipeHandler);
+        .post(createRecipeHandler)
+
+        .put(createRecipeHandler);
 }
 
 export default routes;
