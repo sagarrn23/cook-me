@@ -37,14 +37,14 @@ const updateRelations = (addedCollections, res) => {
                 const authorId = response[3]._id;
 
                 const updateRecipeTax = (ids, id_title) => {
-                    Promise.all([...ids]).then(res => {
-                        const taxIds = res.map(taxId=> taxId._id);
+                    Promise.all([...ids]).then(resp => {
+                        const taxIds = resp.map(taxId=> taxId._id);
                         Recipe.findByIdAndUpdate(
                             {_id: recipeIds}, 
                             {   
                                 [id_title]: taxIds
                             }, 
-                            {new: true}, 
+                            {new: true, upsert: true}, 
                             (err, result) => {
                                 if(err) {
                                     console.log(err)
@@ -71,7 +71,7 @@ const updateRelations = (addedCollections, res) => {
 
                 catIds.forEach(catId => {
                     catId.then(cat => {
-                        Category.findByIdAndUpdate({_id: cat._id}, {recipe_ids: recipeIds}, {new: true}, (err, result) => {
+                        Category.findByIdAndUpdate({_id: cat._id}, {$addToSet:{recipe_ids: recipeIds}}, {new: true, upsert: true}, (err, result) => {
                             if(err) {
                                 console.log(err)
                             }
@@ -81,7 +81,7 @@ const updateRelations = (addedCollections, res) => {
 
                 tagIds.forEach(tagId => {
                     tagId.then(tag => {
-                        Category.findByIdAndUpdate({_id: tag._id}, {recipe_ids: recipeIds}, {new: true}, (err, result) => {
+                        Tag.findByIdAndUpdate({_id: tag._id}, {$addToSet:{recipe_ids: recipeIds}}, {new: true, upsert: true}, (err, result) => {
                             if(err) {
                                 console.log(err)
                             }
@@ -89,7 +89,7 @@ const updateRelations = (addedCollections, res) => {
                     })
                 })
 
-                Author.findByIdAndUpdate({_id: authorId}, {recipe_ids: recipeIds}, {new: true}, (err, result) => {
+                Author.findByIdAndUpdate({_id: authorId}, {$addToSet:{recipe_ids: recipeIds}}, {new: true, upsert: true}, (err, result) => {
                     if(err) {
                         console.log(err)
                     }
