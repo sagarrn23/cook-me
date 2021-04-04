@@ -1,6 +1,7 @@
 import { 
     getRecipe,
-    createRecipeHandler
+    createRecipeHandler,
+    deleteRecipe
 } from '../controllers/controller'
 
 const routes = (app) => {
@@ -14,7 +15,7 @@ const routes = (app) => {
 
         .post(createRecipeHandler)
 
-        .put(createRecipeHandler);
+        .delete(deleteRecipe);
 }
 
 export default routes;

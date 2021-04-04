@@ -39,56 +39,11 @@ const updateRelations = (addedCollections, res) => {
                 const tagIds = response[2];
                 const authorId = response[3]._id;
 
-                //update recipe colletion document tags and categories
-                const updateRecipeTax = (ids, tax_id_title, schema) => {
-                    Promise.all([...ids]).then(resp => {
-                        const taxIds = resp.map(taxId=> taxId._id);
-                        Recipe.findByIdAndUpdate(
-                            {_id: recipeIds}, 
-                            {   
-                                [tax_id_title]: taxIds
-                            }, 
-                            {upsert: true}, 
-                            (err, result) => {
-                                if(err) {
-                                    console.log(err)
-                                }
-                                // console.log("Result"+result);
-                                Recipe.findById(recipeIds, (err, doc)=>{
-                                    // console.log("doc"+doc);
-                                    deletUnwantedRelations(result[tax_id_title], doc[tax_id_title], recipeIds, schema);
-                                })
-                            }
-                        );
-                    })
-                }
-                updateRecipeTax(catIds, 'category_ids', Category)
-                updateRecipeTax(tagIds, 'tag_ids', Tag)
+                
+                updateRecipeTax(catIds, 'category_ids', Category, recipeIds)
+                updateRecipeTax(tagIds, 'tag_ids', Tag, recipeIds)
 
-                const deletUnwantedRelations = (oldId, newId, recipeId, schema) => {
-                    // console.log(oldId, newId, recipeId, schema);
-                    const removeIds = () => {
-                        if(oldId.length) {
-                            return oldId.filter(x => !newId.includes(x))
-                        } else {
-                            return []
-                        };
-                    }
-
-                    // console.log(removeIds());
-
-                    if(removeIds().length) {
-                        removeIds().forEach(removeId => {
-                            console.log(removeId);
-                            schema.findByIdAndUpdate({_id: removeId}, {$pull:{recipe_ids: recipeId}}, {new: true, upsert: true}, (err, result) => {
-                                if(err) {
-                                    console.log(err)
-                                }
-                                console.log(result);
-                            })
-                        })
-                    }
-                }
+                
 
                 // update recipe collection document author
                 Recipe.findByIdAndUpdate(
@@ -99,9 +54,13 @@ const updateRelations = (addedCollections, res) => {
                     {new: true}, 
                     (err, result) => {
                         if(err) {
-                            res.send(err)
+                            console.log(err)
                         }
-                        res.send(result)
+                        // console.log("Result"+result);
+                        Recipe.findById(recipeIds, (err, doc)=>{
+                            // console.log("doc"+doc);
+                            deletUnwantedRelations(result['author_ids'], doc['author_ids'], recipeIds, Author);
+                        })
                     }
                 );
 
@@ -112,6 +71,7 @@ const updateRelations = (addedCollections, res) => {
                             if(err) {
                                 console.log(err)
                             }
+                            console.log("inside");
                         })
                     })
                 })
@@ -123,7 +83,7 @@ const updateRelations = (addedCollections, res) => {
                             if(err) {
                                 console.log(err)
                             }
-                            // console.log(result)
+                            console.log("inside");
                         })
                     })
                 })
@@ -133,8 +93,17 @@ const updateRelations = (addedCollections, res) => {
                     if(err) {
                         console.log(err)
                     }
+                    console.log("inside");
                 })
+                setTimeout(()=>{
+                    console.log("see");
+                }, 5000)
+                return "abc"
             })
+            // .then((data) => {
+            //     console.log(data);
+            //     res.send('success')
+            // })
 }
 
 // create or update recipe collection document
@@ -187,6 +156,82 @@ const addTaxonomy = async(data, schema) => {
             return newData;
         }
     }
+}
+
+//update recipe colletion document tags and categories
+const updateRecipeTax = (ids, tax_id_title, schema, recipeIdss) => {
+    Promise.all([...ids]).then(resp => {
+        const taxIds = resp.map(taxId=> taxId._id);
+        Recipe.findByIdAndUpdate(
+            {_id: recipeIdss}, 
+            {   
+                [tax_id_title]: taxIds
+            }, 
+            {upsert: true}, 
+            (err, result) => {
+                if(err) {
+                    console.log(err)
+                }
+                // console.log("Result"+result);
+                Recipe.findById(recipeIdss, (err, doc)=>{
+                    // console.log("doc"+doc);
+                    deletUnwantedRelations(result[tax_id_title], doc[tax_id_title], recipeIdss, schema);
+                })
+            }
+        );
+    })
+}
+
+const deletUnwantedRelations = (oldId, newId, recipeId, schema) => {
+    const removeIds = () => {
+        if(oldId.length) {
+            return oldId.filter(x => !newId.includes(x))
+        } else {
+            return []
+        };
+    }
+
+    if(removeIds().length) {
+        removeIds().forEach(removeId => {
+            console.log(removeId);
+            schema.findByIdAndUpdate({_id: removeId}, {$pull:{recipe_ids: recipeId}}, {new: true, upsert: true}, (err, result) => {
+                if(err) {
+                    console.log(err)
+                }
+                console.log(result);
+            })
+        })
+    }
+}
+
+// delete recipe and update the recipe relation in tax collection documents
+export const deleteRecipe = (req, res) => {
+    const taxSchemas = [Category, Tag, Author];
+
+    Recipe.findByIdAndRemove(req.body.id, (err, doc) => {
+        if(err) {
+            res.send(err)
+        } else {
+            taxSchemas.forEach(schema => {
+                const taxIds = () => {
+                    if(schema === Category) return doc.category_ids;
+                    if(schema === Tag) return doc.tag_ids;
+                    if(schema === Author) return doc.author_ids;
+                }
+                
+                [...taxIds()].forEach(taxId => {
+                    schema.findByIdAndUpdate({_id: taxId}, {$pull:{recipe_ids: doc._id}}, {new: true, upsert: true}, (err, result) => {
+                        if(err) {
+                            console.log(err)
+                        }
+                        console.log(result);
+                    })
+                })
+            })
+        }
+
+        console.log(doc);
+    })
 }
 
 export const getRecipe = (req, res) => {
