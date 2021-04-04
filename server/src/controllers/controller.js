@@ -4,8 +4,12 @@ import {
     TaxonomySchema,
 } from '../models/model';
 
+import mongoosePaginate from 'mongoose-paginate-v2';
+
 mongoose.set('useFindAndModify', false);
 
+
+RecipeSchema.plugin(mongoosePaginate);
 
 const Recipe = mongoose.model('Recipe', RecipeSchema, 'recipes');
 const Category = mongoose.model('Category', TaxonomySchema, 'categories');
@@ -237,12 +241,27 @@ export const deleteRecipe = (req, res) => {
 
 export const getRecipe = (req, res) => {
 
-    Recipe.find({}, (err, recipe) => {
-        if(err) {
-            res.send(err);
-        }
-        res.json(recipe);
-    });
+    const options = {
+        page: 1,
+        limit: 5
+    }
+
+    Recipe.paginate
+
+    Recipe.paginate({}, options, (err, result) => {
+        const responseData = result.docs.map(recipe => getResponseData(recipe));
+        Promise.all([...responseData]).then(finalData => {
+            result.docs = finalData;
+            res.send(result);
+        })
+    })
+
+    // Recipe.find({}, (err, recipe) => {
+    //     if(err) {
+    //         res.send(err);
+    //     }
+    //     res.send(recipe);
+    // });
 }
 
 const getResponseData = async(inputData) => {
