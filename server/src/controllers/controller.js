@@ -33,20 +33,20 @@ export const createRecipeHandler = (req, res) => {
 // update many to many relations
 const updateRelations = (addedCollections, res) => {
     Promise.all([...addedCollections])
-            .then(response => {
+            .then(async(response) => {
                 const recipeIds = response[0]._id;
                 const catIds = response[1];
                 const tagIds = response[2];
                 const authorId = response[3]._id;
 
                 
-                updateRecipeTax(catIds, 'category_ids', Category, recipeIds)
+                await updateRecipeTax(catIds, 'category_ids', Category, recipeIds)
                 updateRecipeTax(tagIds, 'tag_ids', Tag, recipeIds)
 
                 
 
                 // update recipe collection document author
-                Recipe.findByIdAndUpdate(
+                await Recipe.findByIdAndUpdate(
                     {_id: recipeIds}, 
                     {
                         author_ids: authorId
@@ -65,45 +65,46 @@ const updateRelations = (addedCollections, res) => {
                 );
 
                 // update recipe ids in category collection document
-                catIds.forEach(catId => {
+                await catIds.forEach(catId => {
                     catId.then(cat => {
                         Category.findByIdAndUpdate({_id: cat._id}, {$addToSet:{recipe_ids: recipeIds}}, {new: true, upsert: true}, (err, result) => {
                             if(err) {
                                 console.log(err)
                             }
-                            console.log("inside");
+                            // console.log("inside");
                         })
                     })
                 })
 
                 // update recipe ids in tag collection document
-                tagIds.forEach(tagId => {
+                await tagIds.forEach(tagId => {
                     tagId.then(tag => {
                         Tag.findByIdAndUpdate({_id: tag._id}, {$addToSet:{recipe_ids: recipeIds}}, { upsert: true}, (err, result) => {
                             if(err) {
                                 console.log(err)
                             }
-                            console.log("inside");
+                            // console.log("inside");
                         })
                     })
                 })
 
                 // update recipe ids in author collection document
-                Author.findByIdAndUpdate({_id: authorId}, {$addToSet:{recipe_ids: recipeIds}}, {new: true, upsert: true}, (err, result) => {
+                await Author.findByIdAndUpdate({_id: authorId}, {$addToSet:{recipe_ids: recipeIds}}, {new: true, upsert: true}, (err, result) => {
                     if(err) {
                         console.log(err)
                     }
-                    console.log("inside");
+                    // console.log(result);
                 })
-                setTimeout(()=>{
-                    console.log("see");
-                }, 5000)
-                return "abc"
+                return recipeIds;
             })
-            // .then((data) => {
-            //     console.log(data);
-            //     res.send('success')
-            // })
+            .then(async(id) => {
+                // console.log(data);
+                const recipe = await Recipe.findById(id).exec();
+                const responseData = getResponseData(recipe);
+                responseData.then(finalData => {
+                    res.send(finalData);
+                })
+            })
 }
 
 // create or update recipe collection document
@@ -235,10 +236,40 @@ export const deleteRecipe = (req, res) => {
 }
 
 export const getRecipe = (req, res) => {
+
     Recipe.find({}, (err, recipe) => {
         if(err) {
             res.send(err);
         }
         res.json(recipe);
     });
+}
+
+const getResponseData = async(inputData) => {
+    const catPromise = await inputData.category_ids.map(async(id) => {
+        const catData = await Category.findById(id, 'name _id').exec();
+        return catData;
+    });
+
+    const tagPromise = await inputData.tag_ids.map(async(id) => {
+        const tagData = await Tag.findById(id, 'name _id').exec();
+        return tagData;
+    });
+
+    const authorPromise = await [inputData.author_ids].map(async(id) => {
+        const authorData = await Author.findById(id, 'name _id').exec();
+        return authorData;
+    });
+
+    const catInfo = await Promise.all([...catPromise]).then(info => info);
+    const tagInfo = await Promise.all([...tagPromise]).then(info => info);
+    const authorInfo = await Promise.all([...authorPromise]).then(info => info);
+
+    return {
+        id: inputData._id,
+        name: inputData.name,
+        categories: catInfo,
+        tags: tagInfo,
+        author: authorInfo
+    };
 }
