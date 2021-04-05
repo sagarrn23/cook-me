@@ -1,7 +1,8 @@
-import mongoose from 'mongoose';
+import mongoose, { Collection } from 'mongoose';
 import { 
     RecipeSchema,
     TaxonomySchema,
+    IngredientSchema
 } from '../models/model';
 
 import mongoosePaginate from 'mongoose-paginate-v2';
@@ -15,6 +16,7 @@ const Recipe = mongoose.model('Recipe', RecipeSchema, 'recipes');
 const Category = mongoose.model('Category', TaxonomySchema, 'categories');
 const Tag = mongoose.model('Tag', TaxonomySchema, 'tags');
 const Author = mongoose.model('Author', TaxonomySchema, 'authors');
+const Ingredient = mongoose.model('Ingredient', IngredientSchema, 'ingredients');
 
 export const createRecipeHandler = (req, res) => {
     const inputData = req.body;
@@ -29,8 +31,11 @@ export const createRecipeHandler = (req, res) => {
     const author = inputData.author;
     const addedAuthor = addTaxonomy(author, Author);
 
+    const ingredients = inputData.ingredients;
+    const addedIngredients = addIngredient(ingredients, Ingredient);
+
     // after successful adding data to collection update relations between them
-    const addedCollections = [addedRecipe, addedCategories, addedTags, addedAuthor];
+    const addedCollections = [addedRecipe, addedCategories, addedTags, addedAuthor, addedIngredients];
     updateRelations(addedCollections, res);
 }
 
@@ -42,10 +47,13 @@ const updateRelations = (addedCollections, res) => {
                 const catIds = response[1];
                 const tagIds = response[2];
                 const authorId = response[3]._id;
+                const ingredientIds = response[4].map(ingredient => ingredient._id);
+                console.log(ingredientIds);
 
                 
                 await updateRecipeTax(catIds, 'category_ids', Category, recipeIds)
-                updateRecipeTax(tagIds, 'tag_ids', Tag, recipeIds)
+                await updateRecipeTax(tagIds, 'tag_ids', Tag, recipeIds)
+                // await updateIngredientLinking(ingredientIds, 'ingredient_ids', Ingredient, recipeIds)
 
                 
 
@@ -113,7 +121,7 @@ const updateRelations = (addedCollections, res) => {
 
 // create or update recipe collection document
 const addRecipe = async (data) => {
-    if('id' in data) {
+    if('_id' in data) {
         const updatedData = await Recipe.findByIdAndUpdate({_id: data.id}, data, {new: true}, (err, result) => {
             return result;
         });
@@ -137,7 +145,7 @@ const addTaxonomy = async(data, schema) => {
 
     if(Array.isArray(formatedData())){
         const addedData = formatedData().map(async(item) => {
-            if('id' in item) {
+            if('_id' in item) {
                 const updatedData = await schema.findByIdAndUpdate({_id: item.id}, item, {new: true}, (err, result) => {
                     return result;
                 });
@@ -151,7 +159,7 @@ const addTaxonomy = async(data, schema) => {
     } else {
         const authorData = formatedData()
 
-        if('id' in authorData) {
+        if('_id' in authorData) {
             const updatedData = await schema.findByIdAndUpdate({_id: authorData.id}, authorData, {new: true}, (err, result) => {
                 return result;
             });
@@ -160,6 +168,19 @@ const addTaxonomy = async(data, schema) => {
             const newData = await schema.create(authorData);
             return newData;
         }
+    }
+}
+
+// create or update ingredient Collection document
+const addIngredient = async(data, schema) => {
+    if('_id' in data) {
+        const updatedData = await schema.findByIdAndUpdate({_id: data.id}, data, {new: true}, (err, result) => {
+            return result;
+        });
+        return updatedData;
+    } else {
+        const addedData = await schema.create(data);
+        return addedData;
     }
 }
 
@@ -243,7 +264,8 @@ export const getRecipe = (req, res) => {
 
     const options = {
         page: 1,
-        limit: 5
+        limit: 10,
+        sort: 'asc'
     }
 
     Recipe.paginate
@@ -255,13 +277,6 @@ export const getRecipe = (req, res) => {
             res.send(result);
         })
     })
-
-    // Recipe.find({}, (err, recipe) => {
-    //     if(err) {
-    //         res.send(err);
-    //     }
-    //     res.send(recipe);
-    // });
 }
 
 const getResponseData = async(inputData) => {
@@ -285,7 +300,7 @@ const getResponseData = async(inputData) => {
     const authorInfo = await Promise.all([...authorPromise]).then(info => info);
 
     return {
-        id: inputData._id,
+        _id: inputData._id,
         name: inputData.name,
         categories: catInfo,
         tags: tagInfo,
