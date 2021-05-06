@@ -20,20 +20,10 @@ export const RecipeSchema = new Schema({
         required: true,
         default: 0
     },
-    // ingredients: [{
-    //     ingredient_id: {
-    //         type: Schema.Types.Mixed,
-    //         required: true
-    //     },
-    //     qty: {
-    //         type: Number,
-    //         required: true
-    //     },
-    //     unit: {
-    //         type: String,
-    //         required: true
-    //     }
-    // }],
+    ingredient_ids: [{
+        type: Schema.Types.Mixed,
+        required: true
+    }],
 });
 
 export const TaxonomySchema = new Schema({
@@ -58,14 +48,6 @@ export const IngredientSchema = new Schema({
     },
     qty: {
         type: Number,
-        required: true
-    },
-    price: {
-        type: Number,
-        required: true
-    },
-    price_unit: {
-        type: String,
         required: true
     }
 });

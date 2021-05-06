@@ -1,0 +1,59 @@
+{
+    "create-request-body": {
+        "name":"Samosa",
+        "tags":[
+            {
+                "name": "Indian"
+            },
+            {
+                "name": "Indian"
+            }
+        ],
+        "categories":[
+            {
+                "name": "Oily"
+            },
+            {
+                "name": "Spicy"
+            }
+        ],
+        "author":{
+            "name": "Bella"
+        }
+    }
+}
+
+
+// If we mention id in any of the document it will update that document else create one new
+{
+    "update-request-body": {
+        "_id": "6069dcc7e6942b85c53effa3"
+        "name":"Samosa",
+        "tags":[
+            {
+                "name": "Indian",
+                "_id": "6069dcc7e6942b85c53effa3"
+            },
+            {
+                "name": "Indian",
+                "_id": "6069dcc7e6942b85c53effa3"
+            },
+            {
+                "name": "American" //this will create a new tag
+            }
+        ],
+        "categories":[
+            {
+                "name": "Oily",
+                "_id": "6069dcc7e6942b85c53effa3"
+            },
+            {
+                "name": "Spicy" // this will create a new category
+            }
+        ],
+        "author":{
+            "name": "Bella",
+            "_id": "6069dcc7e6942b85c53effa3"
+        }
+    }
+}

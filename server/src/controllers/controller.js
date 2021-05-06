@@ -48,12 +48,11 @@ const updateRelations = (addedCollections, res) => {
                 const tagIds = response[2];
                 const authorId = response[3]._id;
                 const ingredientIds = response[4].map(ingredient => ingredient._id);
-                console.log(ingredientIds);
 
                 
                 await updateRecipeTax(catIds, 'category_ids', Category, recipeIds)
                 await updateRecipeTax(tagIds, 'tag_ids', Tag, recipeIds)
-                // await updateIngredientLinking(ingredientIds, 'ingredient_ids', Ingredient, recipeIds)
+                await addUpdateIngredient(ingredientIds, 'ingredient_ids', recipeIds)
 
                 
 
@@ -208,6 +207,23 @@ const updateRecipeTax = (ids, tax_id_title, schema, recipeIdss) => {
     })
 }
 
+const addUpdateIngredient = (ids, tax_id_title, recipeIdss) => {
+    const ingredientIds = ids;
+    console.log(ingredientIds);
+    Recipe.findByIdAndUpdate(
+        {_id: recipeIdss}, 
+        {   
+            [tax_id_title]: ingredientIds
+        }, 
+        {upsert: true}, 
+        (err, result) => {
+            if(err) {
+                console.log(err)
+            }
+        }
+    );
+}
+
 const deletUnwantedRelations = (oldId, newId, recipeId, schema) => {
     const removeIds = () => {
         if(oldId.length) {
@@ -279,6 +295,7 @@ export const getRecipe = (req, res) => {
     })
 }
 
+// data to send for get response
 const getResponseData = async(inputData) => {
     const catPromise = await inputData.category_ids.map(async(id) => {
         const catData = await Category.findById(id, 'name _id').exec();

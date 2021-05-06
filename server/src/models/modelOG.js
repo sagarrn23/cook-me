@@ -7,10 +7,10 @@ export const RecipeSchema = new Schema({
         type: String,
         required: true
     },
-    // ingredients: [{
-    //     type: Number,
-    //     required: true
-    // }],
+    ingredients: [{
+        type: Number,
+        required: true
+    }],
     description: {
         type: String,
         required: true
@@ -49,28 +49,28 @@ export const RecipeSchema = new Schema({
     // }],
 });
 
-// export const IngredientSchema = new Schema({
-//     name: {
-//         type: String,
-//         required: true
-//     },
-//     unit: {
-//         type: String,
-//         required: true
-//     },
-//     qty: {
-//         type: Number,
-//         required: true
-//     },
-//     price: {
-//         type: Number,
-//         required: true
-//     },
-//     price_unit: {
-//         type: String,
-//         required: true
-//     }
-// });
+export const IngredientSchema = new Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    unit: {
+        type: String,
+        required: true
+    },
+    qty: {
+        type: Number,
+        required: true
+    },
+    price: {
+        type: Number,
+        required: true
+    },
+    price_unit: {
+        type: String,
+        required: true
+    }
+});
 
 export const taxonomySchema = new Schema({
     name: {
