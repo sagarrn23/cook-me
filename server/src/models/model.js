@@ -24,6 +24,30 @@ export const RecipeSchema = new Schema({
         type: Schema.Types.Mixed,
         required: true
     }],
+    directions:[{
+        type: String,
+        required: false
+    }],
+    time_created:{
+        type: Number,
+        required: true
+    },
+    time_updated:{
+        type: Number,
+        required: false
+    },
+    benefits: [{
+        type: String,
+        required: false
+    }],
+    special_notes: [{
+        type: String,
+        required: false
+    }],
+    food_type: {
+        type: String,
+        required: true
+    }
 });
 
 export const TaxonomySchema = new Schema({

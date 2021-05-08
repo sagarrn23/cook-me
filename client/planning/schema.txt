@@ -16,7 +16,8 @@
                 string,
                 string
             ],
-            time: string,
+            time_created: string,
+            time_updated: string,
             benefits: [
                 string,
                 string,
