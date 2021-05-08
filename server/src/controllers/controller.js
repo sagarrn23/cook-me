@@ -18,6 +18,7 @@ const Tag = mongoose.model('Tag', TaxonomySchema, 'tags');
 const Author = mongoose.model('Author', TaxonomySchema, 'authors');
 const Ingredient = mongoose.model('Ingredient', IngredientSchema, 'ingredients');
 
+// this function creates the document in respective collestion
 export const createRecipeHandler = (req, res) => {
     const inputData = req.body;
     const addedRecipe = addRecipe(inputData);
@@ -121,7 +122,8 @@ const updateRelations = (addedCollections, res) => {
 // create or update recipe collection document
 const addRecipe = async (data) => {
     if('_id' in data) {
-        const updatedData = await Recipe.findByIdAndUpdate({_id: data.id}, data, {new: true}, (err, result) => {
+        console.log(data._id);
+        const updatedData = await Recipe.findByIdAndUpdate({_id: data._id}, data, {new: true}, (err, result) => {
             return result;
         });
         return updatedData;
@@ -145,7 +147,7 @@ const addTaxonomy = async(data, schema) => {
     if(Array.isArray(formatedData())){
         const addedData = formatedData().map(async(item) => {
             if('_id' in item) {
-                const updatedData = await schema.findByIdAndUpdate({_id: item.id}, item, {new: true}, (err, result) => {
+                const updatedData = await schema.findByIdAndUpdate({_id: item._id}, item, {new: true}, (err, result) => {
                     return result;
                 });
                 return updatedData;
@@ -159,7 +161,7 @@ const addTaxonomy = async(data, schema) => {
         const authorData = formatedData()
 
         if('_id' in authorData) {
-            const updatedData = await schema.findByIdAndUpdate({_id: authorData.id}, authorData, {new: true}, (err, result) => {
+            const updatedData = await schema.findByIdAndUpdate({_id: authorData._id}, authorData, {new: true}, (err, result) => {
                 return result;
             });
             return updatedData;
@@ -284,7 +286,7 @@ export const getRecipe = (req, res) => {
         sort: 'asc'
     }
 
-    Recipe.paginate
+    // Recipe.paginate
 
     Recipe.paginate({}, options, (err, result) => {
         const responseData = result.docs.map(recipe => getResponseData(recipe));
@@ -312,15 +314,36 @@ const getResponseData = async(inputData) => {
         return authorData;
     });
 
+    const ingredientPromise = await inputData.ingredient_ids.map(async(id) => {
+        const ingredientData = await Ingredient.findById(id, 'name _id qty unit').exec();
+        return ingredientData;
+    });
+
     const catInfo = await Promise.all([...catPromise]).then(info => info);
     const tagInfo = await Promise.all([...tagPromise]).then(info => info);
     const authorInfo = await Promise.all([...authorPromise]).then(info => info);
+    const ingredientInfo = await Promise.all([...ingredientPromise]).then(info => info);
 
     return {
         _id: inputData._id,
         name: inputData.name,
+        directions: inputData.directions,
+        time_created: inputData.time_created,
+        time_updated: inputData.time_updated,
+        benefits: inputData.benefits,
+        special_notes: inputData.special_notes,
+        food_type: inputData.food_type,
         categories: catInfo,
         tags: tagInfo,
-        author: authorInfo
+        author: authorInfo,
+        ingredient_ids: ingredientInfo,
+        feature_image: 'http://localhost:3001/images/feature_image.jpg',
+        gallary: [
+            'http://localhost:3001/images/image1.jpg',
+            'http://localhost:3001/images/image2.jpg',
+            'http://localhost:3001/images/image3.jpg',
+            'http://localhost:3001/images/image4.jpg',
+            'http://localhost:3001/images/image5.jpg'
+        ]
     };
 }

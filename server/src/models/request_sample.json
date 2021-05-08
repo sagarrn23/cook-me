@@ -57,3 +57,27 @@
         }
     }
 }
+
+// name:Samosa
+// tags[0][name]:Indian
+// //tags[1][name]:African
+// categories[0][name]:Oily
+// categories[1][name]:Spicy
+// author[name]:Bella
+// ingredients[0][name]:Paneer
+// ingredients[0][unit]:KG
+// ingredients[0][qty]:1
+// ingredients[1][name]:Paneer1
+// ingredients[1][unit]:KG1
+// ingredients[1][qty]:2
+// directions[0]: Step 1
+// directions[1]: Step 2
+// directions[2]: STep 3
+// time_created: 12345678
+// time_updated: 3456789
+// benefits[0]: Benefit 1
+// benefits[1]: Benefit 2
+// benefits[2]: Benefit 3
+// special_notes[0]: Special Note 1
+// special_notes[1]: Special Note 2
+// food_type: Veg
